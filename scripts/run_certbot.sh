@@ -17,16 +17,23 @@ get_certificate() {
   echo "certbot exit code $ec"
   if [ $ec -eq 0 ]
   then
-    if $CONCAT
-    then
-      # concat the full chain with the private key (e.g. for haproxy)
-      cat /etc/letsencrypt/live/$d/fullchain.pem /etc/letsencrypt/live/$d/privkey.pem > /certs/$d.pem
-    else
-      # keep full chain and private key in separate files (e.g. for nginx and apache)
-      cp /etc/letsencrypt/live/$d/fullchain.pem /certs/$d.pem
-      cp /etc/letsencrypt/live/$d/privkey.pem /certs/$d.key
+    # if $CONCAT
+    # then
+      # # concat the full chain with the private key (e.g. for haproxy)
+      # cat /etc/letsencrypt/live/$d/fullchain.pem /etc/letsencrypt/live/$d/privkey.pem > /certs/$d.pem
+    # else
+      # # keep full chain and private key in separate files (e.g. for nginx and apache)
+      # cp /etc/letsencrypt/live/$d/fullchain.pem /certs/$d.pem
+      # cp /etc/letsencrypt/live/$d/privkey.pem /certs/$d.key
+    # fi
+    # keep chain, cert and private key in separate files (required by mosquitto)
+	if [[ ! -e /certs/$d ]]; then
+      mkdir /certs/$d
     fi
-    echo "Certificate obtained for $CERT_DOMAINS! Your new certificate - named $d - is in /certs"
+    cp /etc/letsencrypt/live/$d/chain.pem /certs/$d/chain.pem
+    cp /etc/letsencrypt/live/$d/cert.pem /certs/$d/cert.pem
+    cp /etc/letsencrypt/live/$d/privkey.pem /certs/$d/privkey.pem
+    echo "Certificate obtained for $CERT_DOMAINS! Your new certificates - are in /certs/$d"
   else
     echo "Cerbot failed for $CERT_DOMAINS. Check the logs for details."
   fi
